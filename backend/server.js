@@ -72,6 +72,216 @@ async function connectDB() {
 
 connectDB();
 
+// EN server.js, después de connectDB() y antes de las rutas API
+app.post('/api/import-database', async (req, res) => {
+    console.log('🚀 IMPORTANDO base de datos completa...');
+    
+    // Tu script SQL COMPLETO (sin comentarios phpMyAdmin)
+    const sqlScript = `
+        -- Eliminar tablas si existen (opcional, comenta si no quieres)
+        DROP TABLE IF EXISTS order_items;
+        DROP TABLE IF EXISTS orders;
+        DROP TABLE IF EXISTS cart;
+        DROP TABLE IF EXISTS products;
+        DROP TABLE IF EXISTS sellers;
+        DROP TABLE IF EXISTS users;
+
+        -- Crear tabla users
+        CREATE TABLE users (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            username varchar(50) NOT NULL,
+            email varchar(100) NOT NULL,
+            password varchar(255) NOT NULL,
+            user_type enum('buyer','seller') DEFAULT 'buyer',
+            full_name varchar(100) DEFAULT NULL,
+            phone varchar(20) DEFAULT NULL,
+            address text DEFAULT NULL,
+            created_at timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (id),
+            UNIQUE KEY username (username),
+            UNIQUE KEY email (email)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Crear tabla sellers
+        CREATE TABLE sellers (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            user_id int(11) NOT NULL,
+            business_name varchar(100) DEFAULT NULL,
+            business_description text DEFAULT NULL,
+            store_address text DEFAULT NULL,
+            delivery_available tinyint(1) DEFAULT 1,
+            payment_methods text DEFAULT NULL,
+            rating decimal(3,2) DEFAULT 0.00,
+            total_sales int(11) DEFAULT 0,
+            created_at timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (id),
+            KEY user_id (user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Crear tabla products
+        CREATE TABLE products (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            seller_id int(11) NOT NULL,
+            name varchar(200) NOT NULL,
+            description text DEFAULT NULL,
+            category varchar(50) DEFAULT NULL,
+            price decimal(10,2) NOT NULL,
+            stock_quantity int(11) DEFAULT 0,
+            images text DEFAULT NULL,
+            brand varchar(50) DEFAULT NULL,
+            created_at timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (id),
+            KEY seller_id (seller_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Crear tabla cart
+        CREATE TABLE cart (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            user_id int(11) NOT NULL,
+            product_id int(11) NOT NULL,
+            quantity int(11) DEFAULT 1,
+            added_at timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY product_id (product_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Crear tabla orders
+        CREATE TABLE orders (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            user_id int(11) NOT NULL,
+            seller_id int(11) NOT NULL,
+            total_amount decimal(10,2) NOT NULL,
+            shipping_address text DEFAULT NULL,
+            payment_method varchar(50) DEFAULT NULL,
+            status enum('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending',
+            order_date timestamp NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY seller_id (seller_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Crear tabla order_items
+        CREATE TABLE order_items (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            order_id int(11) NOT NULL,
+            product_id int(11) NOT NULL,
+            quantity int(11) NOT NULL,
+            price decimal(10,2) NOT NULL,
+            PRIMARY KEY (id),
+            KEY order_id (order_id),
+            KEY product_id (product_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- ========== INSERTAR DATOS DE PRUEBA ==========
+        
+        -- Insertar usuarios
+        INSERT INTO users (id, username, email, password, user_type, full_name) VALUES
+        (1, 'vendedor1', 'vendedor@makeapp.com', '123456', 'seller', 'Ana López'),
+        (2, 'cliente1', 'cliente@makeapp.com', '123456', 'buyer', 'Carlos Martínez'),
+        (3, 'vendedor2', 'beauty_shop@makeapp.com', '123456', 'seller', 'María García'),
+        (4, 'yahiralvarez74_231', 'yahiralvarez74@gmail.com', 'Yahir5960', 'buyer', 'Yahir Alvarez');
+
+        -- Insertar vendedores
+        INSERT INTO sellers (id, user_id, business_name, business_description, store_address, payment_methods) VALUES
+        (1, 1, 'Belleza Express', 'Cosméticos de alta calidad para todos', 'Av. Principal 123, CDMX', 'Tarjeta, Efectivo, PayPal'),
+        (2, 3, 'Beauty Shop', 'Maquillaje profesional y cuidado de la piel', 'Calle Flores 45, GDL', 'Tarjeta, Transferencia');
+
+        -- Insertar productos
+        INSERT INTO products (id, seller_id, name, description, category, price, stock_quantity, brand) VALUES
+        (1, 1, 'Labial Mate Rojo Pasión', 'Labial de larga duración con acabado mate', 'labios', 15.99, 50, 'Belleza Express'),
+        (2, 1, 'Paleta de Sombras Profesional', '12 tonos para looks espectaculares', 'ojos', 24.99, 30, 'Belleza Express'),
+        (3, 1, 'Base Líquida Natural', 'Base ligera con cobertura media', 'rostro', 18.50, 25, 'Belleza Express'),
+        (4, 2, 'Serum de Vitamina C', 'Revitaliza tu piel', 'piel', 32.99, 15, 'GlowCare'),
+        (5, 2, 'Perfume Floral', 'Fragancia fresca y duradera', 'fragancias', 45.00, 20, 'AromaLuxe'),
+        (6, 2, 'Brochas Profesionales', 'Set de 8 brochas para maquillaje', 'accesorios', 29.99, 40, 'Beauty Tools'),
+        (7, 1, 'Labial Rojo', 'Labia de color rojo de la marca Labello', 'labios', 9.99, 15, 'Labello');
+
+        -- Insertar órdenes
+        INSERT INTO orders (id, user_id, seller_id, total_amount, shipping_address, payment_method, status) VALUES
+        (1, 2, 1, 9.99, '39550', 'tarjeta', 'delivered');
+
+        -- Insertar items de orden
+        INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES
+        (1, 1, 7, 1, 9.99);
+
+        -- ========== AGREGAR CONSTRAINTS (FOREIGN KEYS) ==========
+        
+        -- Constraints para cart
+        ALTER TABLE cart
+        ADD CONSTRAINT cart_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        ADD CONSTRAINT cart_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE;
+
+        -- Constraints para orders
+        ALTER TABLE orders
+        ADD CONSTRAINT orders_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        ADD CONSTRAINT orders_ibfk_2 FOREIGN KEY (seller_id) REFERENCES sellers (id) ON DELETE CASCADE;
+
+        -- Constraints para order_items
+        ALTER TABLE order_items
+        ADD CONSTRAINT order_items_ibfk_1 FOREIGN KEY (order_id) REFERENCES orders (id) ON DELETE CASCADE,
+        ADD CONSTRAINT order_items_ibfk_2 FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE;
+
+        -- Constraints para products
+        ALTER TABLE products
+        ADD CONSTRAINT products_ibfk_1 FOREIGN KEY (seller_id) REFERENCES sellers (id) ON DELETE CASCADE;
+
+        -- Constraints para sellers
+        ALTER TABLE sellers
+        ADD CONSTRAINT sellers_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE;
+    `;
+    
+    try {
+        console.log('📦 Ejecutando script SQL...');
+        
+        // Dividir el script en sentencias individuales
+        const statements = sqlScript
+            .split(';')
+            .filter(stmt => stmt.trim().length > 0)
+            .map(stmt => stmt.trim() + ';');
+        
+        console.log(`📊 Total de sentencias: ${statements.length}`);
+        
+        // Ejecutar cada sentencia
+        let successCount = 0;
+        let errorCount = 0;
+        
+        for (let i = 0; i < statements.length; i++) {
+            try {
+                await db.execute(statements[i]);
+                successCount++;
+                console.log(`✅ (${i+1}/${statements.length}) Sentencia ejecutada`);
+            } catch (stmtError) {
+                errorCount++;
+                console.log(`⚠️ (${i+1}/${statements.length}) Error: ${stmtError.message.substring(0, 100)}`);
+                // Continuar con la siguiente sentencia
+            }
+        }
+        
+        console.log(`🎉 Importación completada: ${successCount} OK, ${errorCount} errores`);
+        
+        res.json({
+            success: true,
+            message: `✅ Base de datos importada exitosamente`,
+            stats: {
+                totalStatements: statements.length,
+                successful: successCount,
+                failed: errorCount
+            },
+            tables: ['users', 'sellers', 'products', 'cart', 'orders', 'order_items'],
+            nextStep: 'Visita https://makeapp-mttq.onrender.com/api/products para verificar'
+        });
+        
+    } catch (error) {
+        console.error('❌ Error general:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            tip: 'Si hay error de FK, ejecuta sin las líneas ALTER TABLE al final'
+        });
+    }
+});
+
 // ========== RUTA PARA SERVIR EL FRONTEND ==========
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
