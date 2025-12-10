@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MakeApp - Marketplace de Cosméticos</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header y Navegación -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <a href="index.html">
+                        <i class="fas fa-palette"></i>
+                        <span>MakeApp</span>
+                    </a>
+                </div>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="Buscar productos, marcas...">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                </div>
+                
+                <div class="nav-links">
+                    <a href="#" id="home-link"><i class="fas fa-home"></i> Inicio</a>
+                    <a href="#" id="categories-link"><i class="fas fa-list"></i> Categorías</a>
+                    <a href="#" id="seller-link"><i class="fas fa-store"></i> Vender</a>
+                    <a href="#" id="cart-link"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-count">0</span></a>
+                    <a href="#" id="login-link"><i class="fas fa-user"></i> Iniciar Sesión</a>
+                </div>
+                
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Menú móvil -->
+    <div class="mobile-menu">
+        <a href="#" id="mobile-home-link"><i class="fas fa-home"></i> Inicio</a>
+        <a href="#" id="mobile-categories-link"><i class="fas fa-list"></i> Categorías</a>
+        <a href="#" id="mobile-seller-link"><i class="fas fa-store"></i> Vender</a>
+        <a href="#" id="mobile-cart-link"><i class="fas fa-shopping-cart"></i> Carrito <span class="mobile-cart-count">0</span></a>
+        <a href="#" id="mobile-login-link"><i class="fas fa-user"></i> Iniciar Sesión</a>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <!-- Banner Principal -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Descubre la belleza en cada producto</h1>
+                    <p>Tu marketplace de confianza para cosméticos y maquillaje</p>
+                    <a href="#featured-products" class="btn btn-primary">Explorar productos</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categorías -->
+        <section class="categories">
+            <div class="container">
+                <h2 class="section-title">Categorías Populares</h2>
+                <div class="categories-grid">
+                    <div class="category-card">
+                        <i class="fas fa-lipstick"></i>
+                        <h3>Labiales</h3>
+                    </div>
+                    <div class="category-card">
+                        <i class="fas fa-eye"></i>
+                        <h3>Ojos</h3>
+                    </div>
+                    <div class="category-card">
+                        <i class="fas fa-palette"></i>
+                        <h3>Rostro</h3>
+                    </div>
+                    <div class="category-card">
+                        <i class="fas fa-spa"></i>
+                        <h3>Cuidado de la Piel</h3>
+                    </div>
+                    <div class="category-card">
+                        <i class="fas fa-spray-can"></i>
+                        <h3>Fragancias</h3>
+                    </div>
+                    <div class="category-card">
+                        <i class="fas fa-brush"></i>
+                        <h3>Accesorios</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Perfil de Usuario (oculta inicialmente) -->
+        <section id="user-profile-section" class="user-profile" style="display: none;">
+        <!-- El contenido se genera dinámicamente -->
+        </section>
+
+        <!-- Sección de Pedidos del Usuario (oculta inicialmente) -->
+        <section id="user-orders-section" class="user-orders" style="display: none;">
+        <!-- El contenido se genera dinámicamente -->
+        </section>
+
+        <!-- Sección de Panel de Vendedor (oculta inicialmente) -->
+        <section id="seller-panel-section" class="seller-panel" style="display: none;">
+        <!-- El contenido se genera dinámicamente -->
+        </section>
+
+        <!-- Productos Destacados -->
+        <section id="featured-products" class="featured-products">
+            <div class="container">
+                <h2 class="section-title">Productos Destacados</h2>
+                <div class="products-grid" id="products-container">
+                    <!-- Los productos se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección para Vendedores -->
+        <section class="seller-cta">
+            <div class="container">
+                <div class="seller-content">
+                    <h2>¿Eres vendedor de cosméticos?</h2>
+                    <p>Únete a MakeApp y llega a miles de clientes interesados en productos de belleza</p>
+                    <a href="#" id="register-seller-link" class="btn btn-secondary">Regístrate como vendedor</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de Inicio de Sesión/Registro -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-tabs">
+                <button class="tab-btn active" data-tab="login">Iniciar Sesión</button>
+                <button class="tab-btn" data-tab="register">Registrarse</button>
+            </div>
+            
+            <div class="tab-content active" id="login-tab">
+                <h3>Iniciar Sesión</h3>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Correo electrónico</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="remember-me"> Recordarme
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                </form>
+                <div class="form-footer">
+                    <p>¿Olvidaste tu contraseña? <a href="#" id="forgot-password-link">Recupérala aquí</a></p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="register-tab">
+                <h3>Registrarse</h3>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-name">Nombre completo</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Correo electrónico</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Contraseña</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirmar contraseña</label>
+                        <input type="password" id="confirm-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="radio" name="user-type" value="buyer" checked> Comprador
+                        </label>
+                        <label>
+                            <input type="radio" name="user-type" value="seller"> Vendedor
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear cuenta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal del Carrito -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content cart-modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Tu Carrito de Compras</h3>
+            <div class="cart-items" id="cart-items-container">
+                <!-- Los productos del carrito se cargarán aquí -->
+            </div>
+            <div class="cart-summary">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total-amount">$0.00</span>
+                </div>
+                <button class="btn btn-primary" id="checkout-btn">Proceder al Pago</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Vendedor -->
+    <div class="modal" id="seller-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Panel del Vendedor</h3>
+            <div class="seller-tabs">
+                <button class="seller-tab-btn active" data-tab="add-product">Agregar Producto</button>
+                <button class="seller-tab-btn" data-tab="manage-products">Mis Productos</button>
+                <button class="seller-tab-btn" data-tab="seller-settings">Configuración</button>
+            </div>
+            
+            <div class="seller-tab-content active" id="add-product-tab">
+                <form id="add-product-form">
+                    <div class="form-group">
+                        <label for="product-name">Nombre del Producto</label>
+                        <input type="text" id="product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description">Descripción</label>
+                        <textarea id="product-description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Precio ($)</label>
+                        <input type="number" id="product-price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock">Cantidad en Stock</label>
+                        <input type="number" id="product-stock" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">Categoría</label>
+                        <select id="product-category">
+                            <option value="labios">Labiales</option>
+                            <option value="ojos">Ojos</option>
+                            <option value="rostro">Rostro</option>
+                            <option value="piel">Cuidado de la Piel</option>
+                            <option value="fragancias">Fragancias</option>
+                            <option value="accesorios">Accesorios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-brand">Marca</label>
+                        <input type="text" id="product-brand">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-images">Imágenes del Producto (URLs, separadas por coma)</label>
+                        <textarea id="product-images" placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="delivery-available"> ¿Realiza envíos?
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-methods">Métodos de Pago Aceptados (separados por coma)</label>
+                        <input type="text" id="payment-methods" placeholder="Tarjeta, PayPal, Efectivo">
+                    </div>
+                    <div class="form-group">
+                        <label for="store-address">Dirección del Local (opcional)</label>
+                        <textarea id="store-address" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Publicar Producto</button>
+                </form>
+            </div>
+            
+            <div class="seller-tab-content" id="manage-products-tab">
+                <div class="seller-products-list" id="seller-products-container">
+                    <!-- Los productos del vendedor se cargarán aquí -->
+                </div>
+            </div>
+            
+            <div class="seller-tab-content" id="seller-settings-tab">
+                <form id="seller-settings-form">
+                    <div class="form-group">
+                        <label for="business-name">Nombre del Negocio</label>
+                        <input type="text" id="business-name">
+                    </div>
+                    <div class="form-group">
+                        <label for="business-description">Descripción del Negocio</label>
+                        <textarea id="business-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="seller-phone">Teléfono de Contacto</label>
+                        <input type="tel" id="seller-phone">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>MakeApp</h4>
+                    <p>Tu marketplace de confianza para productos de belleza y cosméticos.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces Rápidos</h4>
+                    <ul>
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#">Categorías</a></li>
+                        <li><a href="#">Vender en MakeApp</a></li>
+                        <li><a href="#">Ayuda y Soporte</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Políticas</h4>
+                    <ul>
+                        <li><a href="#">Términos de Uso</a></li>
+                        <li><a href="#">Política de Privacidad</a></li>
+                        <li><a href="#">Política de Devoluciones</a></li>
+                        <li><a href="#">Condiciones de Venta</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> info@makeapp.com</li>
+                        <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Acapulco de Juarez, Guerrero, MX</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 MakeApp. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="scripts/main.js"></script>
+</body>
+</html>
