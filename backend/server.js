@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const path = require('path'); // ⭐ AGREGAR ESTA LÍNEA
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +19,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ⭐⭐ SERVIR ARCHIVOS ESTÁTICOS DEL FRONTEND ⭐⭐
+// Tu frontend está en la carpeta 'frontend' al mismo nivel que 'backend'
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Base de datos
 let db;
@@ -67,8 +72,13 @@ async function connectDB() {
 
 connectDB();
 
-// ========== RUTAS BÁSICAS ==========
+// ========== RUTA PARA SERVIR EL FRONTEND ==========
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
+
+// ========== RUTAS API ==========
+app.get('/api', (req, res) => {
     res.json({ 
         message: 'MakeApp API funcionando',
         endpoints: {
@@ -683,22 +693,26 @@ app.put('/api/orders/:id', async (req, res) => {
     }
 });
 
-// ========== MANEJO DE ERRORES ==========
-app.use((req, res) => {
-    res.status(404).json({ error: 'Ruta no encontrada' });
-});
-
-app.use((err, req, res, next) => {
-    console.error('❌ Error:', err);
-    res.status(500).json({ error: 'Error interno del servidor' });
+// ⭐⭐ RUTA PARA MANEJAR SINGLE PAGE APPLICATION (SPA) ⭐⭐
+// Esto sirve index.html para todas las rutas que no sean API
+app.get('*', (req, res) => {
+    // Si es una ruta API, devolver 404
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'Ruta API no encontrada' });
+    }
+    
+    // De lo contrario, servir el frontend
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
 // ========== INICIAR SERVIDOR ==========
 app.listen(PORT, () => {
     console.log(`
     🚀 MakeApp Backend
-    📍 http://localhost:${PORT}
+    📍 Puerto: ${PORT}
     ⏰ ${new Date().toLocaleString()}
     ✅ Listo para recibir peticiones
+    🌐 URL pública: https://makeapp-mttq.onrender.com
+    📁 Sirviendo frontend desde: ${path.join(__dirname, '..', 'frontend')}
     `);
 });
