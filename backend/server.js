@@ -3,7 +3,7 @@ const cors = require('cors');
 const mysql = require('mysql2/promise');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Configuración CORS
 app.use(cors({
@@ -25,15 +25,40 @@ let db;
 async function connectDB() {
     try {
         db = await mysql.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'makeapp_db'
+            host: process.env.DB_HOST || 'localhost',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || '',
+            database: process.env.DB_NAME || 'makeapp_db',
+            port: process.env.DB_PORT || 3306,
+            
+            // ⭐⭐ AGREGA ESTO PARA SSL ⭐⭐
+            ssl: process.env.NODE_ENV === 'production' ? {
+                rejectUnauthorized: false
+            } : undefined,
+            
+            // Opcional: Configuraciones adicionales
+            connectTimeout: 10000, // 10 segundos timeout
+            multipleStatements: false
         });
+        
         console.log('✅ Conectado a MySQL - makeapp_db');
+        console.log(`📍 Host: ${process.env.DB_HOST || 'localhost'}`);
+        
     } catch (err) {
         console.error('❌ Error conectando a MySQL:', err.message);
-        process.exit(1);
+        console.error('Código error:', err.code);
+        
+        // ⚠️ NO salgas del proceso en producción
+        if (process.env.NODE_ENV === 'production') {
+            console.log('⚠️  Continuando en modo sin base de datos...');
+            // Puedes crear una conexión mock para desarrollo
+            db = {
+                execute: () => Promise.resolve([[]]),
+                query: () => Promise.resolve([[]])
+            };
+        } else {
+            process.exit(1);
+        }
     }
 }
 
