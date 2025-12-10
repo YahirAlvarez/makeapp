@@ -24,41 +24,44 @@ let db;
 
 async function connectDB() {
     try {
-        db = await mysql.createConnection({
-            host: process.env.DB_HOST || 'localhost',
+        console.log('🔌 Conectando a MySQL...');
+        
+        // ⭐⭐ CONFIGURACIÓN CORRECTA PARA RAILWAY ⭐⭐
+        const dbConfig = {
+            host: process.env.DB_HOST || 'switchback.proxy.rlwy.net',
             user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASSWORD || '',
-            database: process.env.DB_NAME || 'makeapp_db',
-            port: process.env.DB_PORT || 3306,
+            password: process.env.DB_PASSWORD || 'PNNnPebkJaexxnDfrnrAPBAgbRyWEpou',
+            database: process.env.DB_NAME || 'railway',
+            port: parseInt(process.env.DB_PORT) || 16729,  // ← ¡16729, NO 3306!
             
-            // ⭐⭐ AGREGA ESTO PARA SSL ⭐⭐
+            // SSL SIEMPRE para Railway en producción
             ssl: process.env.NODE_ENV === 'production' ? {
                 rejectUnauthorized: false
             } : undefined,
             
-            // Opcional: Configuraciones adicionales
-            connectTimeout: 10000, // 10 segundos timeout
-            multipleStatements: false
+            connectTimeout: 15000
+        };
+        
+        console.log('📡 Config MySQL:', {
+            host: dbConfig.host,
+            port: dbConfig.port,
+            database: dbConfig.database,
+            usingSSL: !!dbConfig.ssl
         });
         
-        console.log('✅ Conectado a MySQL - makeapp_db');
-        console.log(`📍 Host: ${process.env.DB_HOST || 'localhost'}`);
+        db = await mysql.createConnection(dbConfig);
+        console.log('✅ ¡Conectado a MySQL en Railway!');
         
     } catch (err) {
-        console.error('❌ Error conectando a MySQL:', err.message);
-        console.error('Código error:', err.code);
+        console.error('❌ Error MySQL:', err.message);
+        console.error('Código:', err.code);
         
-        // ⚠️ NO salgas del proceso en producción
-        if (process.env.NODE_ENV === 'production') {
-            console.log('⚠️  Continuando en modo sin base de datos...');
-            // Puedes crear una conexión mock para desarrollo
-            db = {
-                execute: () => Promise.resolve([[]]),
-                query: () => Promise.resolve([[]])
-            };
-        } else {
-            process.exit(1);
-        }
+        // Modo demo para producción
+        console.log('⚠️  Continuando en modo sin base de datos...');
+        db = { 
+            execute: async () => Promise.resolve([[]]), 
+            query: async () => Promise.resolve([[]]) 
+        };
     }
 }
 
